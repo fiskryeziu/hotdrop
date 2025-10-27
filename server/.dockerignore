@@ -1,0 +1,27 @@
+# Ignore node_modules (to prevent unnecessary Docker image size)
+node_modules/
+
+package-lock.json
+
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+*.log
+dist/
+build/
+
+.docker/
+docker-compose.override.yml
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Testing directories
+coverage/
+
+.git/
+.gitignore
