@@ -6,6 +6,7 @@ import {
   timestamp,
   boolean,
   numeric,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 
 export const products = pgTable('products', {
@@ -13,6 +14,16 @@ export const products = pgTable('products', {
   name: varchar('name', { length: 150 }).notNull(),
   description: text('description'),
   price: numeric('price', { precision: 10, scale: 2 }).notNull(),
+  options: jsonb('options')
+    .$type<
+      {
+        name: string;
+        type: 'single' | 'multiple';
+        required: boolean;
+        choices: { label: string; price: number }[];
+      }[]
+    >()
+    .default([]),
   imageUrl: text('image_url'),
   createdAt: timestamp('created_at').defaultNow(),
 });
