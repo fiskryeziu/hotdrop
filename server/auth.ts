@@ -16,4 +16,15 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  advanced: {
+    // useSecureCookies: true,
+    disableCSRFCheck: true,
+    // disableOriginCheck:true
+  },
+  // trustedOrigins: [
+  //   'http://localhost:3000', // Your primary app URL
+  //   'http://127.0.0.1:3000', // Common localhost variant
+  //   // ⚠️ MUST INCLUDE 'null' to support tools like Postman/cURL
+  //   'null',
+  // ],
 });
