@@ -7,10 +7,14 @@ import {
   boolean,
   numeric,
   jsonb,
+  integer,
 } from 'drizzle-orm/pg-core';
 
 export const products = pgTable('products', {
   id: serial('id').primaryKey(),
+  categoryId: integer('category_id')
+    .notNull()
+    .references(() => categories.id),
   name: varchar('name', { length: 150 }).notNull(),
   description: text('description'),
   price: numeric('price', { precision: 10, scale: 2 }).notNull(),
@@ -25,6 +29,14 @@ export const products = pgTable('products', {
     >()
     .default([]),
   imageUrl: text('image_url'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const categories = pgTable('categories', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 100 }).notNull(),
+  description: text('description'),
+  displayOrder: integer('display_order').default(0),
   createdAt: timestamp('created_at').defaultNow(),
 });
 

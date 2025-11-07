@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "nodemon --watch '*.ts' --exec 'ts-node' server.ts",
+    "seed": "docker compose exec backend npx tsx ./db/seed.ts",
     "lint": "eslint 'src/**/*.ts'",
     "format": "prettier --write '*.{ts,js,json,md}'"
   },
