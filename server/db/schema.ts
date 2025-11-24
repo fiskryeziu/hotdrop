@@ -40,6 +40,46 @@ export const categories = pgTable('categories', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+export const orders = pgTable('orders', {
+  id: serial('id').primaryKey(),
+
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+
+  status: varchar('status', { length: 50 }).notNull().default('pending'),
+
+  total: numeric('total', { precision: 10, scale: 2 }).notNull(),
+
+  deliveryAddress: text('delivery_address'),
+  notes: text('notes'),
+
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at')
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export const orderItems = pgTable('order_items', {
+  id: serial('id').primaryKey(),
+
+  orderId: integer('order_id')
+    .notNull()
+    .references(() => orders.id, { onDelete: 'cascade' }),
+
+  productId: integer('product_id')
+    .notNull()
+    .references(() => products.id),
+
+  quantity: integer('quantity').notNull().default(1),
+
+  selectedOptions: jsonb('selected_options')
+    .$type<{ name: string; choice: string; price: number }[]>()
+    .default([]),
+
+  subtotal: numeric('subtotal', { precision: 10, scale: 2 }).notNull(),
+});
+
 // better-auth schema
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
