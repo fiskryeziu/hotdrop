@@ -6,7 +6,7 @@ import { orderItems, orders } from '../db/schema.ts';
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
-    const userId = 'someid';
+    const userId = req.user!.id;
     const { items, total, deliveryAddress, notes } = req.body;
 
     const [newOrder] = await db
@@ -43,7 +43,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
 export const getOrders = async (req: Request, res: Response) => {
   try {
-    const userId = 'someid';
+    const userId = req.user!.id;
 
     const userOrders = await db
       .select()
