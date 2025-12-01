@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
 import { db } from '../index.ts';
 import { orderItems, orders } from '../db/schema.ts';
+import { io } from '../app.ts';
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
@@ -88,9 +89,20 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
       .where(eq(orders.id, orderId))
       .returning();
 
-    // emit real-time update to the user
-    // req.io.to(`user:${updated.userId}`).emit('order:status-update', updated);
+    if (!updated) return res.status(404).json({ error: 'Order not found' });
 
+    //user
+    io.to(`user-${updated.userId}`).emit('order-status-updated', updated);
+
+    //delivery
+    if (status === 'ready' && req.user.role === 'delivery') {
+      io.to(`driver-${updated.userId}`).emit('order-ready', updated);
+    }
+
+    //admin
+    if (status === 'delivered' && req.user.role === 'admin') {
+      io.to('admin-room').emit('order-delivered', updated);
+    }
     res.json(updated);
   } catch {
     res.status(500).json({ error: 'Failed to update status' });
