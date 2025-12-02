@@ -1,4 +1,3 @@
-// controller/order.controller.ts
 import type { Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
 import { db } from '../index.ts';
@@ -32,8 +31,8 @@ export const createOrder = async (req: Request, res: Response) => {
       }
     }
 
-    // Emit real-time update to admin dashboard
-    // req.io.emit('admin:new-order', newOrder);
+    // admin
+    io.emit('order-created', newOrder);
 
     res.json({ success: true, order: newOrder });
   } catch (err) {
@@ -92,16 +91,19 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     if (!updated) return res.status(404).json({ error: 'Order not found' });
 
     //user
-    io.to(`user-${updated.userId}`).emit('order-status-updated', updated);
+    io.to(`user-${updated.userId}`).emit(
+      'order-status-updated',
+      updated.status,
+    );
 
     //delivery
-    if (status === 'ready' && req.user.role === 'delivery') {
-      io.to(`driver-${updated.userId}`).emit('order-ready', updated);
+    if (status === 'ready' && req.user?.role === 'delivery') {
+      io.to(`driver-${updated.userId}`).emit('order-ready', updated.status);
     }
 
     //admin
-    if (status === 'delivered' && req.user.role === 'admin') {
-      io.to('admin-room').emit('order-delivered', updated);
+    if (status === 'delivered' && req.user?.role === 'admin') {
+      io.to(`admin-${updated.userId}`).emit(`order-delivered`, updated.status);
     }
     res.json(updated);
   } catch {
@@ -110,6 +112,7 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
 };
 
 // delete order (user)
+// TODO: or get deleted in 2 days
 export const deleteOrderById = async (req: Request, res: Response) => {
   try {
     const orderId = Number(req.params.orderId);
