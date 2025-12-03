@@ -22,8 +22,43 @@ app.use(
   }),
 );
 
+export const latestDriverLocation = new Map<
+  string,
+  { lat: number; lng: number }
+>();
+
 io.on('connection', (socket: Socket) => {
   console.log('a user connected', socket.id);
+
+  // Client (User) joins order room to track driver
+  socket.on('joinOrderRoom', ({ orderId }: { orderId: string }) => {
+    const room = `order-${orderId}`;
+    socket.join(room);
+
+    // If we already have a location for this order, send it immediately
+    const loc = latestDriverLocation.get(orderId);
+    if (loc) {
+      socket.emit('driverLocation', { orderId, ...loc });
+    }
+  });
+
+  // Driver sends location update via Socket
+  socket.on(
+    'driverLocation',
+    ({ orderId, lat, lng }: { orderId: string; lat: number; lng: number }) => {
+      if (!orderId || typeof lat !== 'number' || typeof lng !== 'number') {
+        console.warn('Invalid driver location payload', { orderId, lat, lng });
+        return;
+      }
+
+      // Keep only the latest point (no history)
+      latestDriverLocation.set(orderId, { lat, lng });
+
+      // Broadcast to every client that is watching this order
+      const room = `order-${orderId}`;
+      io.to(room).emit('driverLocation', { orderId, lat, lng });
+    },
+  );
 });
 
 app.all('/api/auth/*splat', toNodeHandler(auth));

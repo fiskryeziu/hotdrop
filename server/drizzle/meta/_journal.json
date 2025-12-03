@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1761317425435,
-      "tag": "0000_sloppy_paladin",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1761317624133,
-      "tag": "0001_light_xorn",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1761665835243,
-      "tag": "0002_eager_nomad",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1762525559336,
-      "tag": "0003_amused_hobgoblin",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1764020770603,
-      "tag": "0004_optimal_zeigeist",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1764600881047,
-      "tag": "0005_known_rafael_vega",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1764601105998,
-      "tag": "0006_late_malice",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1764601169527,
-      "tag": "0007_misty_the_captain",
+      "when": 1764778866556,
+      "tag": "0000_true_thing",
       "breakpoints": true
     }
   ]
