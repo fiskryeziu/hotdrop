@@ -48,6 +48,8 @@ export const orders = pgTable('orders', {
   status: varchar('status', { length: 50 }).notNull().default('pending'),
   total: numeric('total', { precision: 10, scale: 2 }).notNull(),
   deliveryAddress: text('delivery_address'),
+  deliveryLat: numeric('delivery_lat', { precision: 10, scale: 7 }),
+  deliveryLng: numeric('delivery_lng', { precision: 10, scale: 7 }),
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at')

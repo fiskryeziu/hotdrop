@@ -7,7 +7,8 @@ import { io } from '../app.ts';
 export const createOrder = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
-    const { items, total, deliveryAddress, notes } = req.body;
+    const { items, total, deliveryAddress, deliveryLat, deliveryLng, notes } =
+      req.body;
 
     const [newOrder] = await db
       .insert(orders)
@@ -15,6 +16,8 @@ export const createOrder = async (req: Request, res: Response) => {
         userId,
         total,
         deliveryAddress,
+        deliveryLat,
+        deliveryLng,
         notes,
       })
       .returning();
@@ -44,11 +47,20 @@ export const createOrder = async (req: Request, res: Response) => {
 export const getOrders = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
+    const userRole = req.user!.role;
 
-    const userOrders = await db
-      .select()
-      .from(orders)
-      .where(eq(orders.userId, userId));
+    let userOrders;
+
+    // Admins and delivery drivers see all orders
+    if (userRole === 'admin' || userRole === 'delivery') {
+      userOrders = await db.select().from(orders);
+    } else {
+      // Regular users only see their own orders
+      userOrders = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.userId, userId));
+    }
 
     res.json(userOrders);
   } catch (err) {
@@ -90,11 +102,11 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
 
     if (!updated) return res.status(404).json({ error: 'Order not found' });
 
-    //user
-    io.to(`user-${updated.userId}`).emit(
-      'order-status-updated',
-      updated.status,
-    );
+    // Broadcast to all connected clients
+    io.emit('order-status-updated', {
+      orderId: updated.id,
+      status: updated.status,
+    });
 
     //delivery
     if (status === 'ready' && req.user?.role === 'delivery') {
