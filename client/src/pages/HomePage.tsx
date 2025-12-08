@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Zap, Clock, MapPin } from 'lucide-react';
-import { Button } from '../components/Button';
+import React from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, Zap, Clock, MapPin } from "lucide-react";
+import { Button } from "../components/Button";
 
 export const HomePage: React.FC = () => {
   return (
@@ -12,7 +12,7 @@ export const HomePage: React.FC = () => {
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl mb-6 animate-bounce">
             <span className="text-5xl">🔥</span>
           </div>
-          
+
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
             Delicious Food,
             <br />
@@ -20,11 +20,12 @@ export const HomePage: React.FC = () => {
               Delivered Hot
             </span>
           </h1>
-          
+
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Order from your favorite restaurants and get your food delivered fresh and hot to your doorstep.
+            Order from your favorite restaurants and get your food delivered
+            fresh and hot to your doorstep.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/products">
               <Button size="lg" className="gap-2">
@@ -48,9 +49,12 @@ export const HomePage: React.FC = () => {
             <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
               <Zap className="text-orange-500" size={24} />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Fast Delivery</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Fast Delivery
+            </h3>
             <p className="text-gray-600">
-              Get your food delivered in 30 minutes or less with our express delivery service.
+              Get your food delivered in 30 minutes or less with our express
+              delivery service.
             </p>
           </div>
 
@@ -58,9 +62,12 @@ export const HomePage: React.FC = () => {
             <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
               <Clock className="text-orange-500" size={24} />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Real-time Tracking</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Real-time Tracking
+            </h3>
             <p className="text-gray-600">
-              Track your order in real-time and know exactly when your food will arrive.
+              Track your order in real-time and know exactly when your food will
+              arrive.
             </p>
           </div>
 
@@ -68,9 +75,12 @@ export const HomePage: React.FC = () => {
             <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
               <MapPin className="text-orange-500" size={24} />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Wide Coverage</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Wide Coverage
+            </h3>
             <p className="text-gray-600">
-              We deliver to all areas in the city. Enter your address to check availability.
+              We deliver to all areas in the city. Enter your address to check
+              availability.
             </p>
           </div>
         </div>

@@ -1,7 +1,7 @@
-import React from 'react';
-import { useProducts } from '../hooks/useProducts';
-import { ProductCard } from '../components/ProductCard';
-import { LoadingSpinner } from '../components/LoadingSpinner';
+import React from "react";
+import { useProducts } from "../hooks/useProducts";
+import { ProductCard } from "../components/ProductCard";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 
 export const ProductsPage: React.FC = () => {
   const { data: products, isLoading, error } = useProducts();
@@ -19,7 +19,9 @@ export const ProductsPage: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Oops!</h2>
-          <p className="text-gray-600">Failed to load products. Please try again later.</p>
+          <p className="text-gray-600">
+            Failed to load products. Please try again later.
+          </p>
         </div>
       </div>
     );
@@ -30,7 +32,9 @@ export const ProductsPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Our Menu</h1>
-          <p className="text-gray-600">Discover delicious food from our kitchen</p>
+          <p className="text-gray-600">
+            Discover delicious food from our kitchen
+          </p>
         </div>
 
         {products && products.length > 0 ? (
@@ -41,7 +45,9 @@ export const ProductsPage: React.FC = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No products available at the moment.</p>
+            <p className="text-gray-600 text-lg">
+              No products available at the moment.
+            </p>
           </div>
         )}
       </div>

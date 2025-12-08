@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useOrders } from '../hooks/useOrders';
-import { LoadingSpinner } from '../components/LoadingSpinner';
-import { OrderStatusBadge } from '../components/OrderStatusBadge';
-import { formatCurrency, formatRelativeTime } from '../utils/formatters';
-import { Package, ChevronRight } from 'lucide-react';
-import { getSocket } from '../lib/socket';
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useOrders } from "../hooks/useOrders";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { OrderStatusBadge } from "../components/OrderStatusBadge";
+import { formatCurrency, formatRelativeTime } from "../utils/formatters";
+import { Package, ChevronRight } from "lucide-react";
+import { getSocket } from "../lib/socket";
 
 export const OrdersPage: React.FC = () => {
   const { data: orders, isLoading, refetch } = useOrders();
@@ -14,13 +14,13 @@ export const OrdersPage: React.FC = () => {
   useEffect(() => {
     const socket = getSocket();
 
-    socket.on('order-status-updated', () => {
-      console.log('Order status updated, refreshing list');
+    socket.on("order-status-updated", () => {
+      console.log("Order status updated, refreshing list");
       refetch();
     });
 
     return () => {
-      socket.off('order-status-updated');
+      socket.off("order-status-updated");
     };
   }, [refetch]);
 
@@ -51,8 +51,12 @@ export const OrdersPage: React.FC = () => {
                       <Package className="text-orange-500" size={24} />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Order #{order.id}</h3>
-                      <p className="text-sm text-gray-600">{formatRelativeTime(order.createdAt)}</p>
+                      <h3 className="font-semibold text-gray-900">
+                        Order #{order.id}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {formatRelativeTime(order.createdAt)}
+                      </p>
                     </div>
                   </div>
                   <ChevronRight className="text-gray-400" size={24} />
@@ -76,8 +80,12 @@ export const OrdersPage: React.FC = () => {
         ) : (
           <div className="text-center py-12 bg-white rounded-xl">
             <Package size={64} className="mx-auto text-gray-400 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">No orders yet</h2>
-            <p className="text-gray-600 mb-6">Start ordering to see your order history!</p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              No orders yet
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Start ordering to see your order history!
+            </p>
             <Link
               to="/products"
               className="inline-block px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-medium hover:from-orange-600 hover:to-red-600 transition-all"

@@ -8,8 +8,6 @@
     "types": ["vite/client"],
     "skipLibCheck": true,
 
-
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -25,13 +23,10 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-		"baseUrl": ".",
+    "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ] 
-		},
-
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src"]
 }

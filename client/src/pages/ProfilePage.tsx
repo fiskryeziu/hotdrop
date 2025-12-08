@@ -1,10 +1,10 @@
-import React from 'react';
-import { useSession, signOut } from '../lib/auth-client';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '../components/Button';
-import { LoadingSpinner } from '../components/LoadingSpinner';
-import { User, Mail, Calendar, LogOut } from 'lucide-react';
-import { formatDate } from '../utils/formatters';
+import React from "react";
+import { useSession, signOut } from "../lib/auth-client";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../components/Button";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { User, Mail, Calendar, LogOut } from "lucide-react";
+import { formatDate } from "../utils/formatters";
 
 export const ProfilePage: React.FC = () => {
   const { data: session, isPending } = useSession();
@@ -12,7 +12,7 @@ export const ProfilePage: React.FC = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    navigate("/");
   };
 
   if (isPending) {
@@ -24,7 +24,7 @@ export const ProfilePage: React.FC = () => {
   }
 
   if (!session) {
-    navigate('/login');
+    navigate("/login");
     return null;
   }
 
@@ -39,7 +39,11 @@ export const ProfilePage: React.FC = () => {
           <div className="flex items-center gap-4 mb-8">
             <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center">
               {user.image ? (
-                <img src={user.image} alt={user.name} className="w-full h-full rounded-full" />
+                <img
+                  src={user.image}
+                  alt={user.name}
+                  className="w-full h-full rounded-full"
+                />
               ) : (
                 <User size={40} className="text-white" />
               )}

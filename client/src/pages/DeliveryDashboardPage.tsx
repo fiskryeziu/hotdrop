@@ -1,28 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { useOrders } from '../hooks/useOrders';
-import { LoadingSpinner } from '../components/LoadingSpinner';
-import { formatCurrency, formatDate } from '../utils/formatters';
-import { getSocket } from '../lib/socket';
+import React, { useState, useEffect } from "react";
+import { useOrders } from "../hooks/useOrders";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { formatCurrency, formatDate } from "../utils/formatters";
+import { getSocket } from "../lib/socket";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Button } from '../components/Button';
-import type { Order } from '../types';
-import { MapPin, Navigation, Package, CheckCircle } from 'lucide-react';
+} from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/Button";
+import type { Order } from "../types";
+import { MapPin, Navigation, Package, CheckCircle } from "lucide-react";
 
 export const DeliveryDashboardPage: React.FC = () => {
   const { data: orders, isLoading } = useOrders();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
 
   // Get delivery orders (ready or out for delivery)
   const deliveryOrders = orders?.filter(
-    (order) => order.status === 'ready' || order.status === 'out_for_delivery'
+    (order) => order.status === "ready" || order.status === "out_for_delivery"
   );
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export const DeliveryDashboardPage: React.FC = () => {
           });
         },
         (error) => {
-          console.error('Error getting location:', error);
+          console.error("Error getting location:", error);
         }
       );
     }
@@ -46,7 +48,7 @@ export const DeliveryDashboardPage: React.FC = () => {
     if (!selectedOrder || !location) return;
 
     const socket = getSocket();
-    socket.emit('driverLocation', {
+    socket.emit("driverLocation", {
       orderId: selectedOrder.id.toString(),
       lat: location.lat,
       lng: location.lng,
@@ -75,8 +77,12 @@ export const DeliveryDashboardPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Delivery Dashboard</h1>
-          <p className="text-gray-600">Manage your deliveries and track routes</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Delivery Dashboard
+          </h1>
+          <p className="text-gray-600">
+            Manage your deliveries and track routes
+          </p>
         </div>
 
         {/* Current Location */}
@@ -117,7 +123,9 @@ export const DeliveryDashboardPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Total</p>
-                  <p className="font-bold text-lg">{formatCurrency(selectedOrder.total)}</p>
+                  <p className="font-bold text-lg">
+                    {formatCurrency(selectedOrder.total)}
+                  </p>
                 </div>
                 <Button
                   variant="outline"
@@ -145,7 +153,7 @@ export const DeliveryDashboardPage: React.FC = () => {
                 {deliveryOrders.map((order) => (
                   <Card
                     key={order.id}
-                    className={`${selectedOrder?.id === order.id ? 'border-orange-500 bg-orange-50' : ''}`}
+                    className={`${selectedOrder?.id === order.id ? "border-orange-500 bg-orange-50" : ""}`}
                   >
                     <CardContent className="pt-6">
                       <div className="flex items-start justify-between mb-4">
@@ -155,12 +163,14 @@ export const DeliveryDashboardPage: React.FC = () => {
                           </h3>
                           <Badge
                             className={
-                              order.status === 'ready'
-                                ? 'bg-purple-100 text-purple-800'
-                                : 'bg-indigo-100 text-indigo-800'
+                              order.status === "ready"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-indigo-100 text-indigo-800"
                             }
                           >
-                            {order.status === 'ready' ? 'Ready for Pickup' : 'Out for Delivery'}
+                            {order.status === "ready"
+                              ? "Ready for Pickup"
+                              : "Out for Delivery"}
                           </Badge>
                         </div>
                         <div className="text-right">
@@ -174,10 +184,12 @@ export const DeliveryDashboardPage: React.FC = () => {
                       </div>
 
                       <div className="mb-4">
-                        <p className="text-sm text-gray-600 mb-1">Delivery Address</p>
+                        <p className="text-sm text-gray-600 mb-1">
+                          Delivery Address
+                        </p>
                         <p className="font-medium flex items-center gap-2">
                           <MapPin size={16} className="text-orange-500" />
-                          {order.deliveryAddress || 'No address provided'}
+                          {order.deliveryAddress || "No address provided"}
                         </p>
                       </div>
 

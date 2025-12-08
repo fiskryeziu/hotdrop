@@ -1,9 +1,9 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ShoppingCart, User, LogOut, Package } from 'lucide-react';
-import { useSession, signOut } from '../lib/auth-client';
-import { useCart } from '../contexts/CartContext';
-import { Button } from './Button';
+import React from "react";
+import { Link } from "react-router-dom";
+import { ShoppingCart, User, LogOut, Package } from "lucide-react";
+import { useSession, signOut } from "../lib/auth-client";
+import { useCart } from "../contexts/CartContext";
+import { Button } from "./Button";
 
 export const Navbar: React.FC = () => {
   const { data: session } = useSession();
@@ -11,7 +11,7 @@ export const Navbar: React.FC = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   return (
@@ -30,22 +30,34 @@ export const Navbar: React.FC = () => {
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/products" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
+            <Link
+              to="/products"
+              className="text-gray-700 hover:text-orange-500 font-medium transition-colors"
+            >
               Menu
             </Link>
             {session && (
               <>
-                <Link to="/orders" className="text-gray-700 hover:text-orange-500 font-medium transition-colors flex items-center gap-1">
+                <Link
+                  to="/orders"
+                  className="text-gray-700 hover:text-orange-500 font-medium transition-colors flex items-center gap-1"
+                >
                   <Package size={18} />
                   Orders
                 </Link>
-                {(session.user as any)?.role === 'admin' && (
-                  <Link to="/admin" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
+                {(session.user as any)?.role === "admin" && (
+                  <Link
+                    to="/admin"
+                    className="text-gray-700 hover:text-orange-500 font-medium transition-colors"
+                  >
                     Admin
                   </Link>
                 )}
-                {(session.user as any)?.role === 'delivery' && (
-                  <Link to="/delivery" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
+                {(session.user as any)?.role === "delivery" && (
+                  <Link
+                    to="/delivery"
+                    className="text-gray-700 hover:text-orange-500 font-medium transition-colors"
+                  >
                     Deliveries
                   </Link>
                 )}

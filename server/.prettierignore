@@ -1,0 +1,17 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+drizzle
+
+# Package manager files
+package-lock.json
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+logs

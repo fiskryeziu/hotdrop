@@ -1,11 +1,19 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { CartItem, Product, SelectedOption } from '../types';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import type { CartItem, Product, SelectedOption } from "../types";
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product, quantity: number, selectedOptions: SelectedOption[]) => void;
+  addItem: (
+    product: Product,
+    quantity: number,
+    selectedOptions: SelectedOption[]
+  ) => void;
   removeItem: (productId: number, selectedOptionsKey: string) => void;
-  updateQuantity: (productId: number, selectedOptionsKey: string, quantity: number) => void;
+  updateQuantity: (
+    productId: number,
+    selectedOptionsKey: string,
+    quantity: number
+  ) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
@@ -13,18 +21,23 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_STORAGE_KEY = 'hotdrop_cart';
+const CART_STORAGE_KEY = "hotdrop_cart";
 
 // Generate unique key for cart item based on product and selected options
-const getCartItemKey = (productId: number, selectedOptions: SelectedOption[]): string => {
+const getCartItemKey = (
+  productId: number,
+  selectedOptions: SelectedOption[]
+): string => {
   const optionsStr = selectedOptions
-    .map(opt => `${opt.name}:${opt.choice}`)
+    .map((opt) => `${opt.name}:${opt.choice}`)
     .sort()
-    .join('|');
+    .join("|");
   return `${productId}-${optionsStr}`;
 };
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [items, setItems] = useState<CartItem[]>(() => {
     const stored = localStorage.getItem(CART_STORAGE_KEY);
     return stored ? JSON.parse(stored) : [];
@@ -34,17 +47,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product: Product, quantity: number, selectedOptions: SelectedOption[]) => {
+  const addItem = (
+    product: Product,
+    quantity: number,
+    selectedOptions: SelectedOption[]
+  ) => {
     const itemKey = getCartItemKey(product.id, selectedOptions);
-    
+
     // Calculate subtotal
     const basePrice = parseFloat(product.price);
-    const optionsPrice = selectedOptions.reduce((sum, opt) => sum + opt.price, 0);
+    const optionsPrice = selectedOptions.reduce(
+      (sum, opt) => sum + opt.price,
+      0
+    );
     const subtotal = (basePrice + optionsPrice) * quantity;
 
-    setItems(prevItems => {
+    setItems((prevItems) => {
       const existingIndex = prevItems.findIndex(
-        item => getCartItemKey(item.product.id, item.selectedOptions) === itemKey
+        (item) =>
+          getCartItemKey(item.product.id, item.selectedOptions) === itemKey
       );
 
       if (existingIndex >= 0) {
@@ -64,24 +85,36 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const removeItem = (productId: number, selectedOptionsKey: string) => {
-    setItems(prevItems =>
+    setItems((prevItems) =>
       prevItems.filter(
-        item => getCartItemKey(item.product.id, item.selectedOptions) !== selectedOptionsKey
+        (item) =>
+          getCartItemKey(item.product.id, item.selectedOptions) !==
+          selectedOptionsKey
       )
     );
   };
 
-  const updateQuantity = (productId: number, selectedOptionsKey: string, quantity: number) => {
+  const updateQuantity = (
+    productId: number,
+    selectedOptionsKey: string,
+    quantity: number
+  ) => {
     if (quantity <= 0) {
       removeItem(productId, selectedOptionsKey);
       return;
     }
 
-    setItems(prevItems =>
-      prevItems.map(item => {
-        if (getCartItemKey(item.product.id, item.selectedOptions) === selectedOptionsKey) {
+    setItems((prevItems) =>
+      prevItems.map((item) => {
+        if (
+          getCartItemKey(item.product.id, item.selectedOptions) ===
+          selectedOptionsKey
+        ) {
           const basePrice = parseFloat(item.product.price);
-          const optionsPrice = item.selectedOptions.reduce((sum, opt) => sum + opt.price, 0);
+          const optionsPrice = item.selectedOptions.reduce(
+            (sum, opt) => sum + opt.price,
+            0
+          );
           const subtotal = (basePrice + optionsPrice) * quantity;
           return { ...item, quantity, subtotal };
         }
@@ -117,7 +150,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error('useCart must be used within CartProvider');
+    throw new Error("useCart must be used within CartProvider");
   }
   return context;
 };

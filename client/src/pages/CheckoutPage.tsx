@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCart } from '../contexts/CartContext';
-import { useCreateOrder } from '../hooks/useOrders';
-import { Button } from '../components/Button';
-import { Input } from '../components/Input';
-import { formatCurrency } from '../utils/formatters';
-import { MapPin, Navigation } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../contexts/CartContext";
+import { useCreateOrder } from "../hooks/useOrders";
+import { Button } from "../components/Button";
+import { Input } from "../components/Input";
+import { formatCurrency } from "../utils/formatters";
+import { MapPin, Navigation } from "lucide-react";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import icon from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
 let DefaultIcon = L.icon({
   iconUrl: icon,
@@ -22,8 +22,11 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 // Component to handle map clicks
-function LocationMarker({ position, setPosition }: { 
-  position: [number, number] | null; 
+function LocationMarker({
+  position,
+  setPosition,
+}: {
+  position: [number, number] | null;
   setPosition: (pos: [number, number]) => void;
 }) {
   useMapEvents({
@@ -39,18 +42,22 @@ export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const { items, totalPrice, clearCart } = useCart();
   const createOrderMutation = useCreateOrder();
-  
-  const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [notes, setNotes] = useState('');
-  const [error, setError] = useState('');
+
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [notes, setNotes] = useState("");
+  const [error, setError] = useState("");
   const [showMap, setShowMap] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
-  const [mapCenter, setMapCenter] = useState<[number, number]>([42.6629, 21.1655]); // Pristina default
+  const [selectedLocation, setSelectedLocation] = useState<
+    [number, number] | null
+  >(null);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([
+    42.6629, 21.1655,
+  ]); // Pristina default
 
   // Redirect if cart is empty
   useEffect(() => {
     if (items.length === 0) {
-      navigate('/cart');
+      navigate("/cart");
     }
   }, [items.length, navigate]);
 
@@ -59,7 +66,10 @@ export const CheckoutPage: React.FC = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const coords: [number, number] = [position.coords.latitude, position.coords.longitude];
+          const coords: [number, number] = [
+            position.coords.latitude,
+            position.coords.longitude,
+          ];
           setSelectedLocation(coords);
           setMapCenter(coords);
           setShowMap(true);
@@ -67,12 +77,14 @@ export const CheckoutPage: React.FC = () => {
           reverseGeocode(coords[0], coords[1]);
         },
         (error) => {
-          console.error('Error getting location:', error);
-          setError('Unable to get your location. Please enter address manually or select on map.');
+          console.error("Error getting location:", error);
+          setError(
+            "Unable to get your location. Please enter address manually or select on map."
+          );
         }
       );
     } else {
-      setError('Geolocation is not supported by your browser');
+      setError("Geolocation is not supported by your browser");
     }
   };
 
@@ -87,7 +99,7 @@ export const CheckoutPage: React.FC = () => {
         setDeliveryAddress(data.display_name);
       }
     } catch (error) {
-      console.error('Geocoding error:', error);
+      console.error("Geocoding error:", error);
     }
   };
 
@@ -100,16 +112,16 @@ export const CheckoutPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!deliveryAddress.trim()) {
-      setError('Please enter a delivery address');
+      setError("Please enter a delivery address");
       return;
     }
 
     try {
       const orderData = {
-        items: items.map(item => ({
+        items: items.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
           selectedOptions: item.selectedOptions,
@@ -126,7 +138,7 @@ export const CheckoutPage: React.FC = () => {
       clearCart();
       navigate(`/orders/${result.order.id}`);
     } catch (err: any) {
-      setError(err.message || 'Failed to create order');
+      setError(err.message || "Failed to create order");
     }
   };
 
@@ -136,7 +148,9 @@ export const CheckoutPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
 
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Order Summary
+          </h2>
           <div className="space-y-3 mb-4">
             {items.map((item, index) => (
               <div key={index} className="flex justify-between text-gray-700">
@@ -144,11 +158,16 @@ export const CheckoutPage: React.FC = () => {
                   {item.quantity}x {item.product.name}
                   {item.selectedOptions.length > 0 && (
                     <span className="text-sm text-gray-500">
-                      {' '}({item.selectedOptions.map(opt => opt.choice).join(', ')})
+                      {" "}
+                      (
+                      {item.selectedOptions.map((opt) => opt.choice).join(", ")}
+                      )
                     </span>
                   )}
                 </span>
-                <span className="font-medium">{formatCurrency(item.subtotal)}</span>
+                <span className="font-medium">
+                  {formatCurrency(item.subtotal)}
+                </span>
               </div>
             ))}
           </div>
@@ -160,7 +179,10 @@ export const CheckoutPage: React.FC = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-6">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-xl shadow-lg p-6"
+        >
           <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <MapPin size={24} className="text-orange-500" />
             Delivery Details
@@ -202,7 +224,9 @@ export const CheckoutPage: React.FC = () => {
             {showMap && (
               <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                 <div className="bg-white rounded-xl max-w-2xl w-full p-6">
-                  <h3 className="text-xl font-semibold mb-4">Select Delivery Location</h3>
+                  <h3 className="text-xl font-semibold mb-4">
+                    Select Delivery Location
+                  </h3>
                   <p className="text-sm text-gray-600 mb-4">
                     Click on the map to select your delivery location
                   </p>
@@ -210,13 +234,16 @@ export const CheckoutPage: React.FC = () => {
                     <MapContainer
                       center={mapCenter}
                       zoom={13}
-                      style={{ height: '100%', width: '100%' }}
+                      style={{ height: "100%", width: "100%" }}
                     >
                       <TileLayer
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                       />
-                      <LocationMarker position={selectedLocation} setPosition={setSelectedLocation} />
+                      <LocationMarker
+                        position={selectedLocation}
+                        setPosition={setSelectedLocation}
+                      />
                     </MapContainer>
                   </div>
                   <div className="flex gap-2">
@@ -266,7 +293,9 @@ export const CheckoutPage: React.FC = () => {
               className="w-full"
               disabled={createOrderMutation.isPending}
             >
-              {createOrderMutation.isPending ? 'Placing Order...' : 'Place Order'}
+              {createOrderMutation.isPending
+                ? "Placing Order..."
+                : "Place Order"}
             </Button>
           </div>
         </form>

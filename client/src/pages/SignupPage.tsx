@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { signUp } from '../lib/auth-client';
-import { Button } from '../components/Button';
-import { Input } from '../components/Input';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { signUp } from "../lib/auth-client";
+import { Button } from "../components/Button";
+import { Input } from "../components/Input";
 
 export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
@@ -23,9 +23,9 @@ export const SignupPage: React.FC = () => {
         password,
         name,
       });
-      navigate('/');
+      navigate("/");
     } catch (err: any) {
-      setError(err.message || 'Failed to create account');
+      setError(err.message || "Failed to create account");
     } finally {
       setLoading(false);
     }
@@ -78,14 +78,17 @@ export const SignupPage: React.FC = () => {
             )}
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating account...' : 'Sign Up'}
+              {loading ? "Creating account..." : "Sign Up"}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="text-orange-500 font-medium hover:text-orange-600">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-orange-500 font-medium hover:text-orange-600"
+              >
                 Sign in
               </Link>
             </p>

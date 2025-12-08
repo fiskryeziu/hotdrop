@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useOrders, useUpdateOrderStatus } from '../hooks/useOrders';
-import { LoadingSpinner } from '../components/LoadingSpinner';
-import { formatCurrency, formatDate } from '../utils/formatters';
-import { getSocket } from '../lib/socket';
+import React, { useEffect, useState } from "react";
+import { useOrders, useUpdateOrderStatus } from "../hooks/useOrders";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { formatCurrency, formatDate } from "../utils/formatters";
+import { getSocket } from "../lib/socket";
 import {
   Table,
   TableBody,
@@ -10,32 +10,32 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../components/ui/table';
+} from "../components/ui/table";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '../components/ui/card';
+} from "../components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select';
-import { Badge } from '../components/ui/badge';
-import type { Order } from '../types';
-import { Package, TrendingUp, Clock, CheckCircle } from 'lucide-react';
+} from "../components/ui/select";
+import { Badge } from "../components/ui/badge";
+import type { Order } from "../types";
+import { Package, TrendingUp, Clock, CheckCircle } from "lucide-react";
 
 const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  preparing: 'bg-blue-100 text-blue-800',
-  ready: 'bg-purple-100 text-purple-800',
-  out_for_delivery: 'bg-indigo-100 text-indigo-800',
-  delivered: 'bg-green-100 text-green-800',
-  cancelled: 'bg-red-100 text-red-800',
+  pending: "bg-yellow-100 text-yellow-800",
+  preparing: "bg-blue-100 text-blue-800",
+  ready: "bg-purple-100 text-purple-800",
+  out_for_delivery: "bg-indigo-100 text-indigo-800",
+  delivered: "bg-green-100 text-green-800",
+  cancelled: "bg-red-100 text-red-800",
 };
 
 export const AdminDashboardPage: React.FC = () => {
@@ -46,19 +46,19 @@ export const AdminDashboardPage: React.FC = () => {
   useEffect(() => {
     const socket = getSocket();
 
-    socket.on('order-created', (order: Order) => {
-      setNewOrders(prev => [order, ...prev]);
+    socket.on("order-created", (order: Order) => {
+      setNewOrders((prev) => [order, ...prev]);
       refetch();
     });
 
-    socket.on('order-status-updated', () => {
-      console.log('Order status updated, refreshing admin dashboard');
+    socket.on("order-status-updated", () => {
+      console.log("Order status updated, refreshing admin dashboard");
       refetch();
     });
 
     return () => {
-      socket.off('order-created');
-      socket.off('order-status-updated');
+      socket.off("order-created");
+      socket.off("order-status-updated");
     };
   }, [refetch]);
 
@@ -66,7 +66,7 @@ export const AdminDashboardPage: React.FC = () => {
     try {
       await updateStatusMutation.mutateAsync({ orderId, status: newStatus });
     } catch (error) {
-      console.error('Failed to update order status:', error);
+      console.error("Failed to update order status:", error);
     }
   };
 
@@ -80,24 +80,30 @@ export const AdminDashboardPage: React.FC = () => {
 
   const stats = {
     total: orders?.length || 0,
-    pending: orders?.filter(o => o.status === 'pending').length || 0,
-    preparing: orders?.filter(o => o.status === 'preparing').length || 0,
-    delivered: orders?.filter(o => o.status === 'delivered').length || 0,
+    pending: orders?.filter((o) => o.status === "pending").length || 0,
+    preparing: orders?.filter((o) => o.status === "preparing").length || 0,
+    delivered: orders?.filter((o) => o.status === "delivered").length || 0,
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-          <p className="text-gray-600">Manage all orders and track deliveries</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Admin Dashboard
+          </h1>
+          <p className="text-gray-600">
+            Manage all orders and track deliveries
+          </p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Orders
+              </CardTitle>
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -141,7 +147,8 @@ export const AdminDashboardPage: React.FC = () => {
           <Card className="mb-6 border-orange-500 bg-orange-50">
             <CardHeader>
               <CardTitle className="text-orange-900">
-                🔔 {newOrders.length} New Order{newOrders.length > 1 ? 's' : ''}!
+                🔔 {newOrders.length} New Order{newOrders.length > 1 ? "s" : ""}
+                !
               </CardTitle>
             </CardHeader>
           </Card>
@@ -176,18 +183,20 @@ export const AdminDashboardPage: React.FC = () => {
                         {formatCurrency(order.total)}
                       </TableCell>
                       <TableCell className="max-w-xs truncate">
-                        {order.deliveryAddress || 'N/A'}
+                        {order.deliveryAddress || "N/A"}
                       </TableCell>
                       <TableCell>
                         <Badge className={statusColors[order.status]}>
-                          {order.status.replace('_', ' ')}
+                          {order.status.replace("_", " ")}
                         </Badge>
                       </TableCell>
                       <TableCell>{formatDate(order.createdAt)}</TableCell>
                       <TableCell>
                         <Select
                           value={order.status}
-                          onValueChange={(value) => handleStatusChange(order.id, value)}
+                          onValueChange={(value) =>
+                            handleStatusChange(order.id, value)
+                          }
                         >
                           <SelectTrigger className="w-[180px]">
                             <SelectValue />
@@ -196,7 +205,9 @@ export const AdminDashboardPage: React.FC = () => {
                             <SelectItem value="pending">Pending</SelectItem>
                             <SelectItem value="preparing">Preparing</SelectItem>
                             <SelectItem value="ready">Ready</SelectItem>
-                            <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+                            <SelectItem value="out_for_delivery">
+                              Out for Delivery
+                            </SelectItem>
                             <SelectItem value="delivered">Delivered</SelectItem>
                             <SelectItem value="cancelled">Cancelled</SelectItem>
                           </SelectContent>

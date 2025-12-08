@@ -10,7 +10,7 @@
     "dev": "nodemon --watch '*.ts' --exec 'ts-node' server.ts",
     "seed": "docker compose exec backend npx tsx ./db/seed.ts",
     "lint": "eslint 'src/**/*.ts'",
-    "format": "prettier --write '*.{ts,js,json,md}'"
+    "format": "prettier --write \"**/*.{ts,js,json,md}\""
   },
   "keywords": [],
   "author": "",
@@ -29,7 +29,7 @@
     "install": "^0.13.0",
     "nodemon": "^3.1.10",
     "npm": "^11.6.2",
-    "prettier": "^3.6.2",
+    "prettier": "^3.7.4",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
