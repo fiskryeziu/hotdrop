@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useOrders } from "../hooks/useOrders";
+import { useOrders, useUpdateOrderStatus } from "../hooks/useOrders";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { formatCurrency, formatDate } from "../utils/formatters";
 import { getSocket } from "../lib/socket";
@@ -12,11 +12,12 @@ import {
 } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/Button";
-import type { Order } from "../types";
+import type { Order, OrderStatus } from "../types";
 import { MapPin, Navigation, Package, CheckCircle } from "lucide-react";
 
 export const DeliveryDashboardPage: React.FC = () => {
-  const { data: orders, isLoading } = useOrders();
+  const { data: orders, isLoading, refetch } = useOrders();
+  const updateStatusMutation = useUpdateOrderStatus();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null
@@ -44,6 +45,19 @@ export const DeliveryDashboardPage: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const socket = getSocket();
+
+    socket.on("order-status-updated", () => {
+      console.log("Order status updated, refreshing admin dashboard");
+      refetch();
+    });
+
+    return () => {
+      socket.off("order-status-updated");
+    };
+  }, [refetch]);
+
   const sendLocationUpdate = () => {
     if (!selectedOrder || !location) return;
 
@@ -64,6 +78,15 @@ export const DeliveryDashboardPage: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [selectedOrder, location]);
+
+  const endDelivery = async (orderId: number, newStatus: OrderStatus) => {
+    try {
+      await updateStatusMutation.mutateAsync({ orderId, status: newStatus });
+      setSelectedOrder(null);
+    } catch (error) {
+      console.error("Failed to update order status:", error);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -129,7 +152,7 @@ export const DeliveryDashboardPage: React.FC = () => {
                 </div>
                 <Button
                   variant="outline"
-                  onClick={() => setSelectedOrder(null)}
+                  onClick={() => endDelivery(selectedOrder.id, "delivered")}
                   className="w-full"
                 >
                   End Delivery

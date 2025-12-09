@@ -108,15 +108,6 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
       status: updated.status,
     });
 
-    //delivery
-    if (status === 'ready' && req.user?.role === 'delivery') {
-      io.to(`driver-${updated.userId}`).emit('order-ready', updated.status);
-    }
-
-    //admin
-    if (status === 'delivered' && req.user?.role === 'admin') {
-      io.to(`admin-${updated.userId}`).emit(`order-delivered`, updated.status);
-    }
     res.json(updated);
   } catch {
     res.status(500).json({ error: 'Failed to update status' });
