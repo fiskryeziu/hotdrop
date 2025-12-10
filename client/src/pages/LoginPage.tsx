@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { signIn } from "../lib/auth-client";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { signIn, useSession } from "../lib/auth-client";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const session = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,11 +30,15 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  if (session.data?.session) {
+    return <Navigate to="/" replace />;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-linear-to-br from-orange-50 to-red-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-orange-500 to-red-500 rounded-2xl mb-4">
             <span className="text-3xl">🔥</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">

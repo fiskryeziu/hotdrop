@@ -24,8 +24,22 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/products/:productId" element={<ProductDetailPage />} />
+          <Route
+            path="/products"
+            element={
+              <ProtectedRoute excludeRoles={["delivery", "admin"]}>
+                <ProductsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products/:productId"
+            element={
+              <ProtectedRoute excludeRoles={["delivery", "admin"]}>
+                <ProductDetailPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/cart" element={<CartPage />} />
 
           {/* Protected Routes */}
@@ -40,7 +54,7 @@ function App() {
           <Route
             path="/orders"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute excludeRoles={["delivery", "admin"]}>
                 <OrdersPage />
               </ProtectedRoute>
             }
@@ -48,7 +62,7 @@ function App() {
           <Route
             path="/orders/:orderId"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute excludeRoles={["delivery", "admin"]}>
                 <OrderDetailPage />
               </ProtectedRoute>
             }
@@ -64,7 +78,7 @@ function App() {
           <Route
             path="/admin"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["admin"]}>
                 <AdminDashboardPage />
               </ProtectedRoute>
             }
@@ -72,7 +86,7 @@ function App() {
           <Route
             path="/delivery"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["delivery"]}>
                 <DeliveryDashboardPage />
               </ProtectedRoute>
             }
