@@ -51,6 +51,7 @@ export const orders = pgTable('orders', {
   deliveryLat: numeric('delivery_lat', { precision: 10, scale: 7 }),
   deliveryLng: numeric('delivery_lng', { precision: 10, scale: 7 }),
   notes: text('notes'),
+  phoneNumber: varchar('phone_number', { length: 20 }),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at')
     .defaultNow()

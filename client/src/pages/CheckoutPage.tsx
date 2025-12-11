@@ -44,6 +44,7 @@ export const CheckoutPage: React.FC = () => {
   const createOrderMutation = useCreateOrder();
 
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
   const [showMap, setShowMap] = useState(false);
@@ -119,6 +120,11 @@ export const CheckoutPage: React.FC = () => {
       return;
     }
 
+    if (!phoneNumber.trim()) {
+      setError("Please enter a phone number");
+      return;
+    }
+
     try {
       const orderData = {
         items: items.map((item) => ({
@@ -132,6 +138,7 @@ export const CheckoutPage: React.FC = () => {
         deliveryLat: selectedLocation ? selectedLocation[0].toString() : null,
         deliveryLng: selectedLocation ? selectedLocation[1].toString() : null,
         notes: notes || undefined,
+        phoneNumber,
       };
 
       const result = await createOrderMutation.mutateAsync(orderData);
@@ -195,6 +202,15 @@ export const CheckoutPage: React.FC = () => {
               value={deliveryAddress}
               onChange={(e) => setDeliveryAddress(e.target.value)}
               placeholder="123 Main St, City, State, ZIP"
+              required
+            />
+
+            <Input
+              label="Phone Number"
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="+383 44 123 456"
               required
             />
 

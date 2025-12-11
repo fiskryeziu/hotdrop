@@ -43,6 +43,7 @@ export interface Order {
   deliveryLat: string | null;
   deliveryLng: string | null;
   notes: string | null;
+  phoneNumber: string | null;
   createdAt: Date | string;
   updatedAt: Date | null;
 }

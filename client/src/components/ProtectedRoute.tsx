@@ -7,7 +7,8 @@ export const ProtectedRoute: React.FC<{
   children: React.ReactNode;
   roles?: string[];
   excludeRoles?: string[];
-}> = ({ children, roles, excludeRoles }) => {
+  allowGuest?: boolean;
+}> = ({ children, roles, excludeRoles, allowGuest = false }) => {
   const { data: session, isPending } = useSession();
 
   if (isPending) {
@@ -18,12 +19,14 @@ export const ProtectedRoute: React.FC<{
     );
   }
 
-  if (!session) {
+  // If not authenticated and guests are not allowed, redirect to login
+  if (!session && !allowGuest) {
     return <Navigate to="/login" replace />;
   }
 
   if (
     roles &&
+    session &&
     typeof session.user.role === "string" &&
     !roles.includes(session.user.role)
   ) {
@@ -32,6 +35,7 @@ export const ProtectedRoute: React.FC<{
 
   if (
     excludeRoles &&
+    session &&
     typeof session.user.role === "string" &&
     excludeRoles.includes(session.user.role)
   ) {

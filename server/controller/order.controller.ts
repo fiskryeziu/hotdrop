@@ -7,7 +7,7 @@ import { io } from '../app.ts';
 export const createOrder = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
-    const { items, total, deliveryAddress, deliveryLat, deliveryLng, notes } =
+    const { items, total, deliveryAddress, deliveryLat, deliveryLng, notes, phoneNumber } =
       req.body;
 
     const [newOrder] = await db
@@ -19,6 +19,7 @@ export const createOrder = async (req: Request, res: Response) => {
         deliveryLat,
         deliveryLng,
         notes,
+        phoneNumber,
       })
       .returning();
 
