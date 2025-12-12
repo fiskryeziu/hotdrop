@@ -18,20 +18,41 @@ import { MapPin, Navigation, Package, CheckCircle } from "lucide-react";
 export const DeliveryDashboardPage: React.FC = () => {
   const { data: orders, isLoading, refetch } = useOrders();
   const updateStatusMutation = useUpdateOrderStatus();
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null
   );
+  const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
 
-  // Get delivery orders (ready or out for delivery)
+  const hasRestoredState = React.useRef(false);
+
+  const activeOrder = activeOrderId
+    ? orders?.find((o) => o.id === activeOrderId) || null
+    : null;
+
   const deliveryOrders = orders?.filter(
     (order) => order.status === "ready" || order.status === "out_for_delivery"
   );
 
   useEffect(() => {
-    // Get current location
+    if (hasRestoredState.current) return;
+
+    if (deliveryOrders && deliveryOrders.length > 0) {
+      const existingActive = deliveryOrders.find(
+        (order) => order.status === "out_for_delivery"
+      );
+      if (existingActive) {
+        setActiveOrderId(existingActive.id);
+      }
+      hasRestoredState.current = true;
+    }
+  }, [deliveryOrders]);
+
+  useEffect(() => {
+    // Track location in real-time
+    let watchId: number;
+
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
+      watchId = navigator.geolocation.watchPosition(
         (position) => {
           setLocation({
             lat: position.coords.latitude,
@@ -40,9 +61,18 @@ export const DeliveryDashboardPage: React.FC = () => {
         },
         (error) => {
           console.error("Error getting location:", error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
         }
       );
     }
+
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
   }, []);
 
   useEffect(() => {
@@ -58,31 +88,22 @@ export const DeliveryDashboardPage: React.FC = () => {
     };
   }, [refetch]);
 
-  const sendLocationUpdate = () => {
-    if (!selectedOrder || !location) return;
+  // Send location update whenever location changes and we have an active order
+  useEffect(() => {
+    if (!activeOrder || !location) return;
 
     const socket = getSocket();
     socket.emit("driverLocation", {
-      orderId: selectedOrder.id.toString(),
+      orderId: activeOrder.id.toString(),
       lat: location.lat,
       lng: location.lng,
     });
-  };
-
-  // Auto-send location every 10 seconds when order is selected
-  useEffect(() => {
-    if (!selectedOrder || !location) return;
-
-    sendLocationUpdate();
-    const interval = setInterval(sendLocationUpdate, 10000);
-
-    return () => clearInterval(interval);
-  }, [selectedOrder, location]);
+  }, [activeOrder, location]);
 
   const endDelivery = async (orderId: number, newStatus: OrderStatus) => {
     try {
       await updateStatusMutation.mutateAsync({ orderId, status: newStatus });
-      setSelectedOrder(null);
+      setActiveOrderId(null);
     } catch (error) {
       console.error("Failed to update order status:", error);
     }
@@ -124,12 +145,12 @@ export const DeliveryDashboardPage: React.FC = () => {
         )}
 
         {/* Active Delivery */}
-        {selectedOrder && (
+        {activeOrder && (
           <Card className="mb-6 border-orange-500">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Package className="text-orange-500" />
-                Active Delivery - Order #{selectedOrder.id}
+                Active Delivery - Order #{activeOrder.id}
               </CardTitle>
               <CardDescription>
                 Location updates are being sent every 10 seconds
@@ -141,18 +162,18 @@ export const DeliveryDashboardPage: React.FC = () => {
                   <p className="text-sm text-gray-600">Delivery Address</p>
                   <p className="font-medium flex items-center gap-2">
                     <MapPin size={16} className="text-orange-500" />
-                    {selectedOrder.deliveryAddress}
+                    {activeOrder.deliveryAddress}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Total</p>
                   <p className="font-bold text-lg">
-                    {formatCurrency(selectedOrder.total)}
+                    {formatCurrency(activeOrder.total)}
                   </p>
                 </div>
                 <Button
                   variant="outline"
-                  onClick={() => endDelivery(selectedOrder.id, "delivered")}
+                  onClick={() => endDelivery(activeOrder.id, "delivered")}
                   className="w-full"
                 >
                   End Delivery
@@ -176,7 +197,7 @@ export const DeliveryDashboardPage: React.FC = () => {
                 {deliveryOrders.map((order) => (
                   <Card
                     key={order.id}
-                    className={`${selectedOrder?.id === order.id ? "border-orange-500 bg-orange-50" : ""}`}
+                    className={`${activeOrder?.id === order.id ? "border-orange-500 bg-orange-50" : ""}`}
                   >
                     <CardContent className="pt-6">
                       <div className="flex items-start justify-between mb-4">
@@ -226,7 +247,20 @@ export const DeliveryDashboardPage: React.FC = () => {
                             className="font-medium flex items-center gap-2 text-orange-600 hover:text-orange-700 hover:underline"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                              />
+                            </svg>
                             {order.phoneNumber}
                           </a>
                         </div>
@@ -239,14 +273,20 @@ export const DeliveryDashboardPage: React.FC = () => {
                         </div>
                       )}
 
-                      {selectedOrder?.id === order.id ? (
+                      {activeOrder?.id === order.id ? (
                         <Button variant="outline" className="w-full" disabled>
                           <CheckCircle size={16} className="mr-2" />
                           Currently Delivering
                         </Button>
                       ) : (
                         <Button
-                          onClick={() => setSelectedOrder(order)}
+                          onClick={() => {
+                            updateStatusMutation.mutate({
+                              orderId: order.id,
+                              status: "out_for_delivery",
+                            });
+                            setActiveOrderId(order.id);
+                          }}
                           className="w-full"
                           disabled={!location}
                         >

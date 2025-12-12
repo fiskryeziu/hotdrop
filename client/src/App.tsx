@@ -27,7 +27,10 @@ function App() {
           <Route
             path="/products"
             element={
-              <ProtectedRoute excludeRoles={["delivery", "admin"]} allowGuest={true}>
+              <ProtectedRoute
+                excludeRoles={["delivery", "admin"]}
+                allowGuest={true}
+              >
                 <ProductsPage />
               </ProtectedRoute>
             }
@@ -35,7 +38,10 @@ function App() {
           <Route
             path="/products/:productId"
             element={
-              <ProtectedRoute excludeRoles={["delivery", "admin"]} allowGuest={true}>
+              <ProtectedRoute
+                excludeRoles={["delivery", "admin"]}
+                allowGuest={true}
+              >
                 <ProductDetailPage />
               </ProtectedRoute>
             }

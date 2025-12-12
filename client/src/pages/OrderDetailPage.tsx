@@ -17,7 +17,6 @@ import {
 import "leaflet/dist/leaflet.css";
 import type { DriverLocation } from "../types";
 
-// Fix Leaflet default icon issue
 import L from "leaflet";
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
@@ -41,6 +40,9 @@ export const OrderDetailPage: React.FC = () => {
   const [routeCoordinates, setRouteCoordinates] = useState<[number, number][]>(
     []
   );
+  const [eta, setEta] = useState<number | null>(null);
+
+  const RESTAURANT_LOCATION = { lat: 42.6629, lng: 21.1655 };
 
   useEffect(() => {
     if (!orderId) return;
@@ -48,17 +50,14 @@ export const OrderDetailPage: React.FC = () => {
     const socket = getSocket();
     joinOrderRoom(Number(orderId));
 
-    // Listen for driver location updates
     socket.on("driverLocation", (location: DriverLocation) => {
       if (location.orderId === orderId) {
         setDriverLocation(location);
       }
     });
 
-    // Listen for order status updates
     socket.on("order-status-updated", (newStatus: string) => {
       console.log("Order status updated to:", newStatus);
-      // Refetch order data to get the latest status
       refetch();
     });
 
@@ -68,15 +67,47 @@ export const OrderDetailPage: React.FC = () => {
     };
   }, [orderId, refetch]);
 
-  // Fetch route whenever driver location changes
+  useEffect(() => {
+    if (orderData?.order && !driverLocation && eta === null) {
+      if (orderData.order.status === "out_for_delivery") {
+        fetchRoute(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng);
+      }
+    }
+  }, [orderData, driverLocation]);
+
   useEffect(() => {
     if (driverLocation) {
       fetchRoute(driverLocation.lat, driverLocation.lng);
     }
   }, [driverLocation, orderData]);
 
+  useEffect(() => {
+    if (
+      eta === null ||
+      eta <= 0 ||
+      orderData?.order?.status !== "out_for_delivery"
+    )
+      return;
+
+    const interval = setInterval(() => {
+      setEta((prevEta) => {
+        if (prevEta === null || prevEta <= 0) return 0;
+        return prevEta - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [eta, orderData?.order?.status]);
+
+  // Format seconds to MM:SS
+  const formatTimeToken = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
   // Fetch route from OSRM (Open Source Routing Machine)
-  const fetchRoute = async (driverLat: number, driverLng: number) => {
+  const fetchRoute = async (startLat: number, startLng: number) => {
     if (!orderData?.order) {
       console.log("No order data available yet");
       return;
@@ -85,47 +116,50 @@ export const OrderDetailPage: React.FC = () => {
     // Use actual delivery coordinates if available, otherwise use offset for demo
     const destLat = orderData.order.deliveryLat
       ? parseFloat(orderData.order.deliveryLat)
-      : driverLat + 0.01;
+      : startLat + 0.01;
     const destLng = orderData.order.deliveryLng
       ? parseFloat(orderData.order.deliveryLng)
-      : driverLng + 0.01;
+      : startLng + 0.01;
 
-    console.log("Fetching route from:", { driverLat, driverLng }, "to:", {
+    console.log("Fetching route from:", { startLat, startLng }, "to:", {
       destLat,
       destLng,
     });
 
     try {
-      const url = `https://router.project-osrm.org/route/v1/driving/${driverLng},${driverLat};${destLng},${destLat}?overview=full&geometries=geojson`;
-      console.log("OSRM URL:", url);
+      const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${destLng},${destLat}?overview=full&geometries=geojson`;
 
       const response = await fetch(url);
       const data = await response.json();
-
-      console.log("OSRM Response:", data);
 
       if (data.routes && data.routes[0]) {
         // Convert GeoJSON coordinates to Leaflet format [lat, lng]
         const coords = data.routes[0].geometry.coordinates.map(
           (coord: number[]) => [coord[1], coord[0]] as [number, number]
         );
-        console.log("Route coordinates count:", coords.length);
         setRouteCoordinates(coords);
+
+        // precise
+        if (data.routes[0].duration) {
+          // Store raw seconds directly
+          setEta(Math.ceil(data.routes[0].duration));
+        }
       } else {
-        console.warn("No routes found in OSRM response");
         // Fallback to straight line
         setRouteCoordinates([
-          [driverLat, driverLng],
+          [startLat, startLng],
           [destLat, destLng],
         ]);
+        setEta(null);
       }
     } catch (error) {
       console.error("Error fetching route:", error);
       // Fallback to straight line if routing fails
       setRouteCoordinates([
-        [driverLat, driverLng],
+        [startLat, startLng],
         [destLat, destLng],
       ]);
+      setEta(null);
     }
   };
 
@@ -173,10 +207,12 @@ export const OrderDetailPage: React.FC = () => {
               </h1>
               <div className="flex items-center gap-2 text-gray-600">
                 <Clock size={16} />
-                <span>{formatDate(order.createdAt)}</span>
+                <span>
+                  {formatDate(new Date(order.createdAt).toISOString())}
+                </span>
               </div>
             </div>
-            <OrderStatusBadge status={order.status} />
+            <OrderStatusBadge status={order.status as any} />
           </div>
 
           {order.deliveryAddress && (
@@ -215,6 +251,15 @@ export const OrderDetailPage: React.FC = () => {
                 <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                 <span className="text-gray-600">Delivery Destination</span>
               </div>
+              {eta !== null && (
+                <div className="font-semibold text-orange-600 flex items-center gap-1">
+                  <Clock size={14} />
+                  <span>
+                    ETA:{" "}
+                    {eta <= 0 ? "Arriving Soon!" : `~${formatTimeToken(eta)}`}
+                  </span>
+                </div>
+              )}
             </div>
             <div className="h-96 rounded-lg overflow-hidden border-2 border-gray-200">
               <MapContainer
