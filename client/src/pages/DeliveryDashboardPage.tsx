@@ -12,8 +12,17 @@ import {
 } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "../components/ui/dialog";
 import type { Order, OrderStatus } from "../types";
-import { MapPin, Navigation, Package, CheckCircle } from "lucide-react";
+import { MapPin, Navigation, Package, CheckCircle, QrCode } from "lucide-react";
+import { QRScanner } from "../components/QRScanner";
 
 export const DeliveryDashboardPage: React.FC = () => {
   const { data: orders, isLoading, refetch } = useOrders();
@@ -22,6 +31,19 @@ export const DeliveryDashboardPage: React.FC = () => {
     null
   );
   const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+
+  const handleScanSuccess = (decodedText: string) => {
+    setIsScanning(false);
+    if (!activeOrderId) return; // Note: activeOrderId is the state, activeOrder depends on it
+
+    if (decodedText === activeOrderId.toString()) {
+      setShowVerificationModal(true);
+    } else {
+      alert("Invalid QR Code! Please scan the code from the customer's order page.");
+    }
+  };
 
   const hasRestoredState = React.useRef(false);
 
@@ -171,17 +193,64 @@ export const DeliveryDashboardPage: React.FC = () => {
                     {formatCurrency(activeOrder.total)}
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  onClick={() => endDelivery(activeOrder.id, "delivered")}
-                  className="w-full"
-                >
-                  End Delivery
-                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setIsScanning(true)}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <QrCode size={18} className="mr-2" />
+                    Scan to Verify
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => endDelivery(activeOrder.id, "delivered")}
+                    className="flex-1"
+                  >
+                    Manual Complete
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
         )}
+
+        {isScanning && (
+          <QRScanner
+            onScanSuccess={handleScanSuccess}
+            onClose={() => setIsScanning(false)}
+          />
+        )}
+
+        <Dialog open={showVerificationModal} onOpenChange={setShowVerificationModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-green-600">
+                <CheckCircle size={24} />
+                Verification Successful!
+              </DialogTitle>
+              <DialogDescription>
+                Order #{activeOrderId} has been verified via QR scan.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex gap-2 justify-end sm:justify-end">
+              <Button
+                variant="ghost"
+                onClick={() => setShowVerificationModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (activeOrderId) endDelivery(activeOrderId, "delivered");
+                  setShowVerificationModal(false);
+                }}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Complete Delivery
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Available Orders */}
         <Card>

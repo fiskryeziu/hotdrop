@@ -16,6 +16,7 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { DriverLocation } from "../types";
+import { QRCodeSVG } from "qrcode.react";
 
 import L from "leaflet";
 import icon from "leaflet/dist/images/marker-icon.png";
@@ -234,6 +235,26 @@ export const OrderDetailPage: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Delivery Verification QR Code */}
+        {(order.status === "out_for_delivery" || order.status === "ready") && (
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6 flex flex-col items-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2 text-center">
+              Delivery Verification
+            </h2>
+            <p className="text-gray-500 mb-4 text-center text-sm">
+              Show this QR code to the driver to receive your order
+            </p>
+            <div className="p-4 bg-white border-2 border-gray-100 rounded-xl shadow-sm">
+              <QRCodeSVG
+                value={order.id.toString()}
+                size={200}
+                level="H"
+                includeMargin={true}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Driver Location Map */}
         {driverLocation && order.status === "out_for_delivery" && (
