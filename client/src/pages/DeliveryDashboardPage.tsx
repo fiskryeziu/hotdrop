@@ -231,6 +231,37 @@ export const DeliveryDashboardPage: React.FC = () => {
               <DialogDescription>
                 Order #{activeOrderId} has been verified via QR scan.
               </DialogDescription>
+              {activeOrder && (
+                <div className="mt-4 space-y-3 bg-gray-50 p-4 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Deliver To</p>
+                    <p className="text-sm text-gray-900">{activeOrder.deliveryAddress}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Amount Due</p>
+                    <p className="text-lg font-bold text-orange-600">
+                      {formatCurrency(activeOrder.total)}
+                    </p>
+                  </div>
+                  {activeOrder.phoneNumber && (
+                     <div>
+                      <p className="text-sm font-medium text-gray-500">Contact</p>
+                      <p className="text-sm text-gray-900">{activeOrder.phoneNumber}</p>
+                    </div>
+                  )}
+                  {activeOrder.notes && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Notes</p>
+                      <p className="text-sm text-gray-900 italic">"{activeOrder.notes}"</p>
+                    </div>
+                  )}
+                  <div className="pt-2 border-t border-gray-200 mt-2">
+                    <p className="text-xs text-center text-gray-400">
+                       Please confirm these details match before completing delivery.
+                    </p>
+                  </div>
+                </div>
+              )}
             </DialogHeader>
             <DialogFooter className="flex gap-2 justify-end sm:justify-end">
               <Button
