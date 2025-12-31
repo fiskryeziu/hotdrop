@@ -15,6 +15,13 @@
       "when": 1764957843743,
       "tag": "0001_third_calypso",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1767199204419,
+      "tag": "0002_pink_ben_urich",
+      "breakpoints": true
     }
   ]
 }

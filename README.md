@@ -38,12 +38,13 @@ cd hotdrop
 ```bash
 cd server
 cp .env.example .env
-# Edit .env with your database credentials
+# The .env file is pre-configured for Docker, but you can edit secrets if needed.
 ```
 
 3. **Start all services**
 ```bash
-docker-compose up -d
+cd ..
+docker-compose up -d --build
 ```
 
 This will start:
@@ -53,12 +54,12 @@ This will start:
 
 4. **Run database migrations**
 ```bash
-docker-compose exec backend npx drizzle-kit push
+docker-compose exec backend npm run db:push
 ```
 
 5. **Seed the database (optional)**
 ```bash
-docker-compose exec backend npx tsx ./db/seed.ts
+docker-compose exec backend npm run seed
 ```
 
 ### Stopping the Application
