@@ -5,7 +5,6 @@ import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 
 export const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
   const session = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,11 +17,13 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      await signIn.email({
+      const res = await signIn.email({
         email,
         password,
       });
-      navigate("/");
+      if (res.error) {
+        throw new Error(res.error.message);
+      }
     } catch (err: any) {
       setError(err.message || "Failed to sign in");
     } finally {

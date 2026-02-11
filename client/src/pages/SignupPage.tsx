@@ -19,12 +19,15 @@ export const SignupPage: React.FC = () => {
     setLoading(true);
 
     try {
-      await signUp.email({
+      const res = await signUp.email({
         email,
         password,
         name,
       });
-      navigate("/");
+
+      if (res.error) {
+        throw new Error(res.error.message);
+      }
     } catch (err: any) {
       setError(err.message || "Failed to create account");
     } finally {
