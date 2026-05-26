@@ -13,9 +13,9 @@ export const getSocket = (): Socket => {
   return socket;
 };
 
-export const joinOrderRoom = (orderId: number) => {
+export const joinOrderRoom = (orderId: string) => {
   const socket = getSocket();
-  socket.emit("joinOrderRoom", { orderId: orderId.toString() });
+  socket.emit("joinOrderRoom", { orderId: orderId });
 };
 
 export const disconnectSocket = () => {

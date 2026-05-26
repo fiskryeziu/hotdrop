@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useOrder } from "../hooks/useOrders";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -13,6 +13,7 @@ import {
   Marker,
   Popup,
   Polyline,
+  useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { DriverLocation } from "../types";
@@ -31,6 +32,23 @@ let DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
+type RecenterMapProps = {
+  lat: number;
+  lng: number;
+};
+
+function RecenterMap({ lat, lng }: RecenterMapProps) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.panTo([lat, lng], {
+      animate: true,
+    });
+  }, [lat, lng, map]);
+
+  return null;
+}
+
 export const OrderDetailPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
@@ -43,62 +61,56 @@ export const OrderDetailPage: React.FC = () => {
   );
   const [eta, setEta] = useState<number | null>(null);
 
-  const RESTAURANT_LOCATION = { lat: 42.6629, lng: 21.1655 };
+  const lastRouteUpdate = useRef(0);
+
+  const RESTAURANT_LOCATION = {
+    lat: 42.231513993886516,
+    lng: 20.71370137216924,
+  };
 
   useEffect(() => {
     if (!orderId) return;
 
     const socket = getSocket();
-    joinOrderRoom(Number(orderId));
+    joinOrderRoom(orderId);
 
-    socket.on("driverLocation", (location: DriverLocation) => {
+    const handleDriverLocation = (location: DriverLocation) => {
       if (location.orderId === orderId) {
         setDriverLocation(location);
       }
-    });
+    };
 
-    socket.on("order-status-updated", (newStatus: string) => {
-      console.log("Order status updated to:", newStatus);
-      refetch();
-    });
+    const handleStatus = () => refetch();
+
+    socket.on("driverLocation", handleDriverLocation);
+    socket.on("order-status-updated", handleStatus);
 
     return () => {
-      socket.off("driverLocation");
-      socket.off("order-status-updated");
+      socket.off("driverLocation", handleDriverLocation);
+      socket.off("order-status-updated", handleStatus);
     };
   }, [orderId, refetch]);
 
   useEffect(() => {
-    if (orderData?.order && !driverLocation && eta === null) {
-      if (orderData.order.status === "out_for_delivery") {
-        fetchRoute(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng);
-      }
+    if (!orderData?.order) return;
+    if (driverLocation || eta !== null) return;
+
+    if (orderData.order.status === "out_for_delivery") {
+      fetchRoute(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng);
     }
-  }, [orderData, driverLocation]);
+  }, [orderData, driverLocation, eta]);
 
+  // throttle route updates
   useEffect(() => {
-    if (driverLocation) {
-      fetchRoute(driverLocation.lat, driverLocation.lng);
-    }
-  }, [driverLocation, orderData]);
+    if (!driverLocation || !orderData?.order) return;
 
-  useEffect(() => {
-    if (
-      eta === null ||
-      eta <= 0 ||
-      orderData?.order?.status !== "out_for_delivery"
-    )
-      return;
+    const now = Date.now();
+    if (now - lastRouteUpdate.current < 8000) return;
 
-    const interval = setInterval(() => {
-      setEta((prevEta) => {
-        if (prevEta === null || prevEta <= 0) return 0;
-        return prevEta - 1;
-      });
-    }, 1000);
+    lastRouteUpdate.current = now;
 
-    return () => clearInterval(interval);
-  }, [eta, orderData?.order?.status]);
+    fetchRoute(driverLocation.lat, driverLocation.lng);
+  }, [driverLocation]);
 
   // Format seconds to MM:SS
   const formatTimeToken = (totalSeconds: number) => {
@@ -109,12 +121,8 @@ export const OrderDetailPage: React.FC = () => {
 
   // Fetch route from OSRM (Open Source Routing Machine)
   const fetchRoute = async (startLat: number, startLng: number) => {
-    if (!orderData?.order) {
-      console.log("No order data available yet");
-      return;
-    }
+    if (!orderData?.order) return;
 
-    // Use actual delivery coordinates if available, otherwise use offset for demo
     const destLat = orderData.order.deliveryLat
       ? parseFloat(orderData.order.deliveryLat)
       : startLat + 0.01;
@@ -122,45 +130,22 @@ export const OrderDetailPage: React.FC = () => {
       ? parseFloat(orderData.order.deliveryLng)
       : startLng + 0.01;
 
-    console.log("Fetching route from:", { startLat, startLng }, "to:", {
-      destLat,
-      destLng,
-    });
-
     try {
       const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${destLng},${destLat}?overview=full&geometries=geojson`;
 
-      const response = await fetch(url);
-      const data = await response.json();
+      const res = await fetch(url);
+      const data = await res.json();
 
-      if (data.routes && data.routes[0]) {
-        // Convert GeoJSON coordinates to Leaflet format [lat, lng]
-        const coords = data.routes[0].geometry.coordinates.map(
-          (coord: number[]) => [coord[1], coord[0]] as [number, number]
-        );
-        setRouteCoordinates(coords);
+      if (!data.routes?.[0]) return;
 
-        // precise
-        if (data.routes[0].duration) {
-          // Store raw seconds directly
-          setEta(Math.ceil(data.routes[0].duration));
-        }
-      } else {
-        // Fallback to straight line
-        setRouteCoordinates([
-          [startLat, startLng],
-          [destLat, destLng],
-        ]);
-        setEta(null);
-      }
-    } catch (error) {
-      console.error("Error fetching route:", error);
-      // Fallback to straight line if routing fails
-      setRouteCoordinates([
-        [startLat, startLng],
-        [destLat, destLng],
-      ]);
-      setEta(null);
+      const coords = data.routes[0].geometry.coordinates.map(
+        (c: number[]) => [c[1], c[0]] as [number, number]
+      );
+
+      setRouteCoordinates(coords);
+      setEta(Math.ceil(data.routes[0].duration));
+    } catch (err) {
+      console.error("Route error", err);
     }
   };
 
@@ -288,6 +273,10 @@ export const OrderDetailPage: React.FC = () => {
                 zoom={13}
                 style={{ height: "100%", width: "100%" }}
               >
+                <RecenterMap
+                  lat={driverLocation.lat}
+                  lng={driverLocation.lng}
+                />
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

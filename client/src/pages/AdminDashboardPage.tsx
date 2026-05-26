@@ -190,7 +190,7 @@ export const AdminDashboardPage: React.FC = () => {
                           {order.status.replace("_", " ")}
                         </Badge>
                       </TableCell>
-                      <TableCell>{formatDate(order.createdAt)}</TableCell>
+                      <TableCell>{formatDate(order.createdAt.toString())}</TableCell>
                       <TableCell>
                         <Select
                           value={order.status}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { signIn, useSession } from "../lib/auth-client";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
