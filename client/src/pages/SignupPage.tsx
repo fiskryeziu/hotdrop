@@ -1,39 +1,49 @@
-import React, { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import React, { useActionState } from "react";
+import { Link, Navigate } from "react-router-dom";
 import { signUp, useSession } from "../lib/auth-client";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
+import type { ActionState } from "@/types";
 
+const initialState: ActionState = {
+  success: false,
+  error: null,
+};
 export const SignupPage: React.FC = () => {
-  const navigate = useNavigate();
   const session = useSession();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const [response, action, isLoading] = useActionState(
+    async (_: ActionState, formData: FormData): Promise<ActionState> => {
+      try {
+        const name = formData.get("name") as string;
+        const email = formData.get("email") as string;
+        const password = formData.get("password") as string;
+        const res = await signUp.email({
+          name,
+          email,
+          password,
+        });
 
-    try {
-      const res = await signUp.email({
-        email,
-        password,
-        name,
-      });
+        if (res.error) {
+          return {
+            success: false,
+            error: res.error.message ?? "Failed to create account",
+          };
+        }
 
-      if (res.error) {
-        throw new Error(res.error.message);
+        return {
+          success: true,
+          error: null,
+        };
+      } catch (err: any) {
+        return {
+          success: false,
+          error: err.message || "Failed to create account",
+        };
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to create account");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    initialState
+  );
 
   if (session.data?.session) {
     return <Navigate to="/" replace />;
@@ -51,12 +61,11 @@ export const SignupPage: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form action={action} className="space-y-6">
             <Input
               label="Name"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              name="name"
               placeholder="John Doe"
               required
             />
@@ -64,8 +73,7 @@ export const SignupPage: React.FC = () => {
             <Input
               label="Email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email"
               placeholder="you@example.com"
               required
             />
@@ -73,20 +81,19 @@ export const SignupPage: React.FC = () => {
             <Input
               label="Password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
               placeholder="••••••••"
               required
             />
 
-            {error && (
+            {response.error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
+                {response.error}
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Sign Up"}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Creating account..." : "Sign Up"}
             </Button>
           </form>
 

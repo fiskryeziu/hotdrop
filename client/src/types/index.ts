@@ -104,3 +104,8 @@ export interface DriverLocation {
   lat: number;
   lng: number;
 }
+
+export type ActionState = {
+  success: boolean;
+  error: string | null;
+};

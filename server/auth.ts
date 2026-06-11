@@ -23,10 +23,13 @@ export const auth = betterAuth({
     disableCSRFCheck: true,
     // disableOriginCheck:true
   },
-  // trustedOrigins: [
-  //   'http://localhost:3000', // Your primary app URL
-  //   'http://127.0.0.1:3000', // Common localhost variant
-  //   // ⚠️ MUST INCLUDE 'null' to support tools like Postman/cURL
-  //   'null',
-  // ],
+  trustedOrigins: [
+    //   'http://localhost:3000', // Your primary app URL
+    'http://localhost:5173',
+    //   'http://127.0.0.1:3000', // Common localhost variant
+    //   // ⚠️ MUST INCLUDE 'null' to support tools like Postman/cURL
+    'null',
+  ],
 });
+
+// bug: ERROR [Better Auth]: Invalid origin: http://localhost:5173
