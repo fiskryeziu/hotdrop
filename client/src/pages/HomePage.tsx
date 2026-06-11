@@ -2,21 +2,23 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Zap, Clock, MapPin } from "lucide-react";
 import { Button } from "../components/Button";
+import { useSession } from "@/lib/auth-client";
 
 export const HomePage: React.FC = () => {
+  const { data: session } = useSession();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
+    <div className="min-h-screen bg-linear-to-br from-orange-50 via-white to-red-50">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl mb-6 animate-bounce">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-linear-to-br from-orange-500 to-red-500 rounded-3xl mb-6 animate-bounce">
             <span className="text-5xl">🔥</span>
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
             Delicious Food,
             <br />
-            <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
               Delivered Hot
             </span>
           </h1>
@@ -33,11 +35,13 @@ export const HomePage: React.FC = () => {
                 <ArrowRight size={20} />
               </Button>
             </Link>
-            <Link to="/signup">
-              <Button size="lg" variant="outline">
-                Sign Up
-              </Button>
-            </Link>
+            {!session && (
+              <Link to="/signup">
+                <Button size="lg" variant="outline">
+                  Sign Up
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </section>
