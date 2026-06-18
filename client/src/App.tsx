@@ -13,6 +13,7 @@ import { OrderDetailPage } from "./pages/OrderDetailPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage";
 import { DeliveryDashboardPage } from "./pages/DeliveryDashboardPage";
+import { OrderDetailPageDummy } from "./pages/orderdummy";
 
 function App() {
   return (
@@ -69,7 +70,7 @@ function App() {
             path="/orders/:orderId"
             element={
               <ProtectedRoute excludeRoles={["delivery", "admin"]}>
-                <OrderDetailPage />
+                <OrderDetailPageDummy />
               </ProtectedRoute>
             }
           />
